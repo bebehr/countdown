@@ -2,7 +2,7 @@ import { Temporal } from '@js-temporal/polyfill'
 
 export function setupCountdown (element) {
   const startDate = new Temporal.PlainDate(2026, 5, 1)
-  const endDate = new Temporal.PlainDate(2028, 4, 30)
+  const endDate = new Temporal.PlainDate(2028, 5, 1)
   const currentDate = Temporal.Now.plainDateISO()
   const daysTotal = endDate.since(startDate).days
   const daysLeft = endDate.since(currentDate).days
@@ -24,7 +24,22 @@ export function setupCountdown (element) {
     document.querySelector('#progress-left').setAttribute('style', `width: ${progressLeft}%`)
     document.querySelector('#progress-left-label').innerHTML = progressLeft + '%'
     document.querySelector('#count-down').innerHTML = daysLeft
+    document.querySelector('#workdays-left').innerHTML = workdaysLeft
   }
 
+  const getWorkdaysLeft = () => {
+    let current = currentDate
+    let workdays = 0
+    while (Temporal.PlainDate.compare(current, endDate) < 0) {
+      const dayOfWeek = current.dayOfWeek
+      if (dayOfWeek !== 6 && dayOfWeek !== 7) {
+        workdays++
+      }
+      current = current.add({ days: 1 })
+    }
+    return workdays
+  }
+
+  const workdaysLeft = getWorkdaysLeft()
   renderCountdown()
 }
