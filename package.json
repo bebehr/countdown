@@ -29,6 +29,7 @@
     "test:npm": "npm audit && npm outdated"
   },
   "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.8"
   },
