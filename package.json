@@ -25,13 +25,14 @@
     "lint:html": "npx htmlhint . --ignore \"**/dist/**,**/node_modules/**\"",
     "lint:js": "npx standard",
     "lint:package-json": "npx npm-package-json-lint . && npx sort-package-json --check",
-    "preview": "vite preview",
+    "preview": "vite preview --base=/countdown/",
     "test": "npm run lint && npm run test:npm",
     "test:npm": "npm audit && npm outdated"
   },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1",
     "@popperjs/core": "^2.11.8",
+    "axios": "^1.16.1",
     "bootstrap": "^5.3.8"
   },
   "devDependencies": {

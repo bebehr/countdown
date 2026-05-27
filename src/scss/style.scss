@@ -1,2 +1,11 @@
-// Import all of Bootstrap’s CSS
 @import "bootstrap/scss/bootstrap";
+
+.custom-loading-overlay {
+  z-index: 1050;
+  background-color: rgba(var(--bs-body-bg-rgb), 0.75);
+}
+
+.custom-spinner-size {
+  width: 3rem;
+  height: 3rem;
+}
