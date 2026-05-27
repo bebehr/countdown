@@ -10,6 +10,13 @@ export function setupCountdown (element) {
   const progressDone = Math.round(daysPassed / daysTotal * 100)
   const progressLeft = 100 - progressDone
 
+  const customHolidays = [
+    new Temporal.PlainDate(2026, 5, 15),
+    new Temporal.PlainDate(2026, 6, 5),
+    new Temporal.PlainDate(2027, 5, 7),
+    new Temporal.PlainDate(2027, 5, 28)
+  ]
+
   const renderCountdown = () => {
     document.querySelector('#start-date').setAttribute('datetime', startDate.toString())
     document.querySelector('#start-date').innerHTML = startDate.toLocaleString('de-DE', { dateStyle: 'short' })
@@ -32,7 +39,10 @@ export function setupCountdown (element) {
     let workdays = 0
     while (Temporal.PlainDate.compare(current, endDate) < 0) {
       const dayOfWeek = current.dayOfWeek
-      if (dayOfWeek !== 6 && dayOfWeek !== 7) {
+      const isHoliday = customHolidays.some(holiday =>
+        Temporal.PlainDate.compare(current, holiday) === 0
+      )
+      if (dayOfWeek !== 6 && dayOfWeek !== 7 && !isHoliday) {
         workdays++
       }
       current = current.add({ days: 1 })
