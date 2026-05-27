@@ -21,7 +21,8 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "lint": "npm run lint:package-json && npm run lint:js",
+    "lint": "npm run lint:package-json && npm run lint:js && npm run lint:html",
+    "lint:html": "npx htmlhint . --ignore \"**/dist/**,**/node_modules/**\"",
     "lint:js": "npx standard",
     "lint:package-json": "npx npm-package-json-lint . && npx sort-package-json --check",
     "preview": "vite preview",
@@ -34,6 +35,7 @@
     "bootstrap": "^5.3.8"
   },
   "devDependencies": {
+    "htmlhint": "^1.9.2",
     "npm-package-json-lint": "^9.1.0",
     "npm-package-json-lint-config-default": "^8.0.1",
     "sass": "^1.100.0",
