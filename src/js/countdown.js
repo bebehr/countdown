@@ -1,7 +1,7 @@
 import { Temporal } from '@js-temporal/polyfill'
 import axios from 'axios'
 
-export async function setupCountdown (element) {
+export async function setupCountdown () {
   const startDate = new Temporal.PlainDate(2026, 5, 1)
   const endDate = new Temporal.PlainDate(2028, 5, 1)
   const daysTotal = endDate.since(startDate).days
@@ -24,7 +24,7 @@ export async function setupCountdown (element) {
       years.push(year)
     }
 
-    const requests = years.map(year =>
+    const holidayRequests = years.map(year =>
       axios.get('https://feiertage-api.de/api/', {
         params: {
           jahr: year,
@@ -33,9 +33,21 @@ export async function setupCountdown (element) {
       })
     )
 
-    const responses = await axios.all(requests)
+    const schoolHolidayRequest = axios.get('https://openholidaysapi.org/SchoolHolidays/', {
+      params: {
+        countryIsoCode: 'DE',
+        subdivisionIsoCode: 'DE-NW',
+        validFrom: startDate.toString(),
+        validTo: endDate.toString()
+      }
+    })
 
-    responses.forEach(response => {
+    const [schoolHolidayResponse, ...holidayResponses] = await Promise.all([
+      schoolHolidayRequest,
+      ...holidayRequests
+    ])
+
+    holidayResponses.forEach(response => {
       const holidaysObject = response.data
       Object.values(holidaysObject).forEach(holiday => {
         if (holiday.datum) {
@@ -43,8 +55,21 @@ export async function setupCountdown (element) {
         }
       })
     })
+
+    const schoolHolidaysList = schoolHolidayResponse.data || []
+    schoolHolidaysList.forEach(period => {
+      if (period.startDate && period.endDate) {
+        let currentVacationDay = Temporal.PlainDate.from(period.startDate) // OpenHolidaysAPI nutzt meist validFrom/validTo
+        const endVacationDay = Temporal.PlainDate.from(period.endDate)
+
+        while (Temporal.PlainDate.compare(currentVacationDay, endVacationDay) <= 0) {
+          allHolidays.add(currentVacationDay.toString())
+          currentVacationDay = currentVacationDay.add({ days: 1 })
+        }
+      }
+    })
   } catch (error) {
-    console.error('Feiertage konnten nicht geladen werden', error)
+    console.error('API-Daten konnten nicht geladen werden', error)
   } finally {
     const overlay = document.querySelector('#loading-overlay')
     if (overlay) {
@@ -57,8 +82,8 @@ export async function setupCountdown (element) {
     let workdays = 0
     while (Temporal.PlainDate.compare(current, endDate) < 0) {
       const dayOfWeek = current.dayOfWeek
-      const isHoliday = allHolidays.has(current.toString())
-      if (dayOfWeek !== 6 && dayOfWeek !== 7 && !isHoliday) {
+      const isHolidayOrVacation = allHolidays.has(current.toString())
+      if (dayOfWeek !== 6 && dayOfWeek !== 7 && !isHolidayOrVacation) {
         workdays++
       }
       current = current.add({ days: 1 })
@@ -109,7 +134,7 @@ export async function setupCountdown (element) {
 
     const daysLeft = endDate.since(currentDate).days
     const daysPassed = currentDate.since(startDate).days
-    const progressDone = Math.round(daysPassed / daysTotal * 100)
+    const progressDone = Math.round((daysPassed / daysTotal) * 100)
     const progressLeft = 100 - progressDone
     const workdaysLeft = getWorkdaysLeft(currentDate)
 
